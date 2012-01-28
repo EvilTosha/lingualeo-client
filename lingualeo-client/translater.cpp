@@ -2,13 +2,13 @@
 
 #include "translater.h"
 
+const QUrl Translater::SITE_URL("http://lingualeo.ru/");
+
 
 Translater::Translater(QObject *parent) :
   QObject(parent){
-	_manager = new QNetworkAccessManager();
-	connect(_manager, SIGNAL(finished(QNetworkReply*)), SLOT(replyFinished(QNetworkReply*)));
-	_loginUrl = QUrl("http://lingualeo.ru/api/login");
-	_curReply = nullptr;
+	manager_ = new QNetworkAccessManager();
+	connect(manager_, SIGNAL(finished(QNetworkReply*)), SLOT(replyFinished(QNetworkReply*)));
 
 	signIn("toshaevil@gmail.com", "1234567");
 }
@@ -25,37 +25,48 @@ void Translater::replyFinished(QNetworkReply *reply) {
 		QByteArray array = reply->readAll();
 		QTextEdit *e = new QTextEdit(QString::fromUtf8(array));
 		e->show();
-		QList<QNetworkCookie>  cookies = _manager->cookieJar()->cookiesForUrl(_loginUrl);
-		qDebug() << "COOKIES for" << _loginUrl.host() << cookies;
+		QList<QNetworkCookie>  cookies = manager_->cookieJar()->cookiesForUrl(SITE_URL);
+		qDebug() << "COOKIES for" << SITE_URL.host() << cookies;
+
+		/* Debug only staff */
+		static bool a = 0;
+		if (a) { return; }
+		a = 1;
+		getTranslates("opacity");
+		/* End of debug staff */
+
 	} else {
 		//get http status code
 		int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 		qDebug() << "Error : " << httpStatus << endl;
+		//exit(0);
 		//do some error management
 	}
 	reply->deleteLater();
 }
 
 void Translater::signIn(QString login, QString password) {
-	QNetworkRequest req(_loginUrl);
-	QByteArray postData;
-	postData.append("remember=1&email=" + QUrl::toPercentEncoding(login) +
-									"&password=" + QUrl::toPercentEncoding(password));
-	postRequest(req, postData);
+	QUrl url(SITE_URL.toString() + "api/login");
+	url.addQueryItem("email", login);
+	url.addQueryItem("password", password);
+	url.addQueryItem("remember", "1");
+	postRequest(QNetworkRequest(url));
 }
 
 void Translater::postRequest(QNetworkRequest req, QByteArray postData) {
-	if (_curReply) {
-		_curReply->abort();
-	}
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-	_curReply = _manager->post(req, postData);
+	QVariant cookie;
+	cookie.setValue(manager_->cookieJar()->cookiesForUrl(SITE_URL));
+	req.setHeader(QNetworkRequest::CookieHeader, cookie);
+	manager_->post(req, postData);
 }
 
 void Translater::getTranslates(QString word, bool media) {
-	_curWord = word;
-	QNetworkRequest req(QUrl("http://lingualeo.ru/api/gettranslates"));
-	QByteArray postData;
-	postData.append("word=" + word + (media ? "include_media=1" : ""));
-	postRequest(req, postData);
+	QUrl url(SITE_URL.toString() + "api/gettranslates");
+	url.addQueryItem("word", word);
+	if (media) {
+		url.addQueryItem("include_media", "1");
+	}
+	QNetworkRequest req(url);
+	postRequest(req);
 }

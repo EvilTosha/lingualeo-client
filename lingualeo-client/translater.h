@@ -16,23 +16,20 @@ public:
 signals:
 	void wordTranslated(QVariant translateData);
 
+	QNetworkReply* curReply() const;
+	QString curWord() const;
 
 public slots:
 	void replyFinished(QNetworkReply *reply);
 	void signIn(QString login, QString password);
 	void getTranslates(QString word, bool media = true);
-	void postRequest(QNetworkRequest req, QByteArray postData);
+	void postRequest(QNetworkRequest req, QByteArray postData = "");
 
 	// Setters
-	void setCurWord(QString word) { _curWord = word; }
-	void setCurReply(QNetworkReply *reply) { _curReply = reply; }
-
 
 private:
-	QNetworkAccessManager *_manager;
-	QUrl _loginUrl;
-	QString _curWord;
-	QNetworkReply *_curReply;
+	QNetworkAccessManager *manager_;
+	static const QUrl SITE_URL;
 };
 
 #endif // TRANSLATER_H
