@@ -1,0 +1,7 @@
+*.o
+*.user
+*.Debug
+*.Release
+Makefile
+debug/
+release/
