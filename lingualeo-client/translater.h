@@ -12,21 +12,27 @@ class Translater : public QObject {
   Q_OBJECT
 public:
   explicit Translater(QObject *parent = 0);
-
-	QString byteArrayToString(QByteArray ba);
   
 signals:
-  
+	void wordTranslated(QVariant translateData);
+
+
 public slots:
 	void replyFinished(QNetworkReply *reply);
 	void signIn(QString login, QString password);
-	//	Development only staff
-	void  loginCheck();
+	void getTranslates(QString word, bool media = true);
+	void postRequest(QNetworkRequest req, QByteArray postData);
+
+	// Setters
+	void setCurWord(QString word) { _curWord = word; }
+	void setCurReply(QNetworkReply *reply) { _curReply = reply; }
+
 
 private:
 	QNetworkAccessManager *_manager;
 	QUrl _loginUrl;
-
+	QString _curWord;
+	QNetworkReply *_curReply;
 };
 
 #endif // TRANSLATER_H
