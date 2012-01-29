@@ -5,8 +5,8 @@
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
-	Translater t;
-//  w.show();
+	MainWindow w;
+	w.show();
   
   return a.exec();
 }

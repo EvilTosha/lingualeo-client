@@ -12,16 +12,15 @@ class Translater : public QObject {
   Q_OBJECT
 public:
   explicit Translater(QObject *parent = 0);
-  
+
 signals:
 	void wordTranslated(QVariant translateData);
-
-	QNetworkReply* curReply() const;
-	QString curWord() const;
+	void loginSucceed();
+	void loginFailed(QString errorMsg = "");
 
 public slots:
 	void replyFinished(QNetworkReply *reply);
-	void signIn(QString login, QString password);
+	void login(QString email, QString password);
 	void getTranslates(QString word, bool media = true);
 	void postRequest(QNetworkRequest req, QByteArray postData = "");
 
@@ -29,7 +28,10 @@ public slots:
 
 private:
 	QNetworkAccessManager *manager_;
-	static const QUrl SITE_URL;
+	static const QString SITE_URL;
+	static const QString TRANSLATES_PATH;
+	static const QString LOGIN_PATH;
+	static const QString ADDWORD_PATH;
 };
 
 #endif // TRANSLATER_H
