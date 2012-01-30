@@ -8,6 +8,8 @@
 #include <QNetworkCookieJar>
 #include <QDebug>
 
+#include "QJson/parser.h"
+
 class Translater : public QObject {
   Q_OBJECT
 public:

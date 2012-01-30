@@ -1,9 +1,9 @@
 #include "translater.h"
 
-const QString Translater::SITE_URL("http://lingualeo.ru/");
-const QString Translater::TRANSLATES_PATH("api/gettranslates");
-const QString Translater::LOGIN_PATH("api/login");
-const QString Translater::ADDWORD_PATH("api/addword");
+const QString Translater::SITE_URL("http://lingualeo.ru");
+const QString Translater::TRANSLATES_PATH("/api/gettranslates");
+const QString Translater::LOGIN_PATH("/api/login");
+const QString Translater::ADDWORD_PATH("/api/addword");
 
 
 Translater::Translater(QObject *parent) :
@@ -15,15 +15,27 @@ Translater::Translater(QObject *parent) :
 
 void Translater::replyFinished(QNetworkReply *reply) {
 	if ((reply->error()) == QNetworkReply::NoError) {
-		QByteArray data = reply->readAll();
 		QString path = reply->url().path();
-		if (path == LOGIN_PATH) {
+		QByteArray data = reply->readAll();
+		QJson::Parser parser;
+		bool parseSuccess;
+		QVariant parseResult = parser.parse(data, &parseSuccess);
+		if (path.compare(LOGIN_PATH) == 0) {
+			if (!parseSuccess) {
+				emit loginFailed(tr("Reply parse error"));
+				return;
+			}
+			QString errorMsg = parseResult.toMap()["error_msg"].toString();
+			if (errorMsg != "") {
+				emit loginFailed(errorMsg);
+				return;
+			}
+			emit loginSucceed();
+		}
+		else if (path.compare(TRANSLATES_PATH) == 0) {
 
 		}
-		else if (path == TRANSLATES_PATH) {
-
-		}
-		else if (path == ADDWORD_PATH) {
+		else if (path.compare(ADDWORD_PATH) == 0) {
 
 		}
 		else {

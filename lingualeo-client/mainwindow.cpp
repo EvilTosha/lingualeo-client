@@ -32,11 +32,11 @@ void MainWindow::login() {
 
 
 	QGridLayout *layout = new QGridLayout(loginDialog_);
-	layout->addWidget(emailLabel, 0, 0);
-	layout->addWidget(emailLineEdit_, 0, 1);
-	layout->addWidget(passwordLabel, 1, 0);
-	layout->addWidget(passwordLineEdit_, 1, 1);
-	layout->addWidget(loginStatusLabel_, 2, 0, 1, 2);
+	layout->addWidget(loginStatusLabel_, 0, 0, 1, 2);
+	layout->addWidget(emailLabel, 1, 0);
+	layout->addWidget(emailLineEdit_, 1, 1);
+	layout->addWidget(passwordLabel, 2, 0);
+	layout->addWidget(passwordLineEdit_, 2, 1);
 	layout->addWidget(loginButton, 3, 0);
 	layout->addWidget(exitButton, 3, 1);
 
@@ -44,6 +44,9 @@ void MainWindow::login() {
 	loginDialog_->setLayout(layout);
 	loginDialog_->setWindowTitle(tr("Authorization to lingualeo.ru"));
 	loginDialog_->setModal(true);
+
+	connect(translater_, SIGNAL(loginFailed(QString)), this, SLOT(loginFail(QString)));
+	connect(translater_, SIGNAL(loginSucceed()), this, SLOT(loginSuccess()));
 	if (loginDialog_->exec()) {
 		loginDialog_->close();
 	}
