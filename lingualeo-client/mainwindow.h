@@ -17,16 +17,21 @@ public:
   ~MainWindow();
 
 public slots:
+	/* Login functions */
 	void login();
 	void tryLogin();
-	void loginFail(QString errorMsg = "");
-	void loginSuccess();
 
 private:
+	/* General */
 	Translater *translater_;
+
+	/* Login dialog GUI */
 	QDialog *loginDialog_;
 	QLineEdit *emailLineEdit_, *passwordLineEdit_;
 	QLabel *loginStatusLabel_;
+
+	/* MainWindow GUI */
+	QLineEdit *mainLineEdit_;
 
 };
 

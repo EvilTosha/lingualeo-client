@@ -17,14 +17,20 @@ public:
 
 signals:
 	void wordTranslated(QVariant translateData);
+	void wordAdded();
 	void loginSucceed();
-	void loginFailed(QString errorMsg = "");
+	void requestFailed(QString errorMsg = "");
+	void translateFailded(QString errorMsg = "");
 
 public slots:
-	void replyFinished(QNetworkReply *reply);
+	/* LinguaLeo.ru API functions */
 	void login(QString email, QString password);
 	void getTranslates(QString word, bool media = true);
+	void addWord(QString word, QString translate, QString context = "");
+
+	/* Serve functions */
 	void postRequest(QNetworkRequest req, QByteArray postData = "");
+	void replyFinished(QNetworkReply *reply);
 
 	// Setters
 
