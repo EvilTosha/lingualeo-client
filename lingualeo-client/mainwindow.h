@@ -6,6 +6,7 @@
 #include <QGridLayout>
 #include <QDialog>
 #include <QLabel>
+#include <QListView>
 
 #include "translater.h"
 
@@ -20,6 +21,7 @@ public slots:
 	/* Login functions */
 	void login();
 	void tryLogin();
+	void viewTranslates(QStringList &translates);
 
 private:
 	/* General */
@@ -32,7 +34,7 @@ private:
 
 	/* MainWindow GUI */
 	QLineEdit *mainLineEdit_;
-
+	QListView *translatesListView_;
 };
 
 #endif // MAINWINDOW_H

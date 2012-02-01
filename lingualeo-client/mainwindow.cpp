@@ -1,5 +1,9 @@
 #include <QPushButton>
 #include <QStatusBar>
+#include <QValidator>
+#include <QAction>
+#include <QAbstractItemModel>
+#include <QStringListModel>
 
 #include "mainwindow.h"
 
@@ -11,17 +15,41 @@ MainWindow::MainWindow(QWidget *parent)
 
 	statusBar()->showMessage(tr("Login successfully done"));
 	connect(translater_, SIGNAL(requestFailed(QString)), statusBar(), SLOT(showMessage(QString)));
-	mainLineEdit_ = new QLineEdit(this);
 
-	layout()->addWidget(mainLineEdit_);
-
+	/* Creating GUI elements */
 	setWindowTitle(tr("Lingualeo client"));
+	QWidget *widget = new QWidget(this);
+	setCentralWidget(widget);
+	mainLineEdit_ = new QLineEdit(this);
+	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
+	translatesListView_ = new QListView(this);
+	translatesListView_->setViewMode(QListView::ListMode);
+	translatesListView_->setFlow(QListView::TopToBottom);
+	translatesListView_->setMovement(QListView::Static);
+
+	/* Debug staff */
+	QStringList v {"aba", "caba", "daba"};
+	viewTranslates(v);
+	/* End of debug staff */
+
+	/* Input validation (only latin letters and spaces) */
+	QRegExp rx("[a-zA-Z\\s]*");
+	QRegExpValidator *validator = new QRegExpValidator(rx);
+	mainLineEdit_->setValidator(validator);
+
+	/* Composing layout */
+	QGridLayout *layout = new QGridLayout(centralWidget());
+	layout->addWidget(mainLineEdit_, 0, 0);
+	layout->addWidget(translatesListView_, 1, 0);
+	widget->setLayout(layout);
 }
 
 MainWindow::~MainWindow() {
   
 }
 
+
+/* Login logic */
 void MainWindow::login() {
 	/* GUI initialization*/
 	loginDialog_ = new QDialog(this);
@@ -73,4 +101,10 @@ void MainWindow::tryLogin() {
 		return;
 	}
 	translater_->login(email, password);
+}
+
+/* Main logic */
+void MainWindow::viewTranslates(QStringList &translates) {
+	QAbstractItemModel *model = new QStringListModel(translates);
+	translatesListView_->setModel(model);
 }

@@ -20,7 +20,6 @@ signals:
 	void wordAdded();
 	void loginSucceed();
 	void requestFailed(QString errorMsg = "");
-	void translateFailded(QString errorMsg = "");
 
 public slots:
 	/* LinguaLeo.ru API functions */
