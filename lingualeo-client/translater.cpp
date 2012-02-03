@@ -53,40 +53,48 @@ void Translater::replyFinished(QNetworkReply *reply) {
 	reply->deleteLater();
 }
 
-void Translater::postRequest(QNetworkRequest req, QByteArray postData) {
+QNetworkRequest Translater::wrappedRequest(QUrl &url) const {
+	QNetworkRequest req(url);
 	/* Adding appropriate parameters and headers before sending request */
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 	QVariant cookie;
 	cookie.setValue(manager_->cookieJar()->cookiesForUrl(SITE_URL));
 	req.setHeader(QNetworkRequest::CookieHeader, cookie);
-	manager_->post(req, postData);
+	return req;
 }
 
-void Translater::login(QString email, QString password) {
+void Translater::postRequest(QUrl &url, QByteArray postData) const {
+	manager_->post(wrappedRequest(url), postData);
+}
+
+void Translater::getRequest(QUrl &url) const {
+	manager_->get(wrappedRequest(url));
+}
+
+void Translater::login(QString &email, QString &password) const {
 	/* Login to lingualeo.ru */
 	QUrl url(SITE_URL + LOGIN_PATH);
 	url.addQueryItem("email", email);
 	url.addQueryItem("password", password);
 	url.addQueryItem("remember", "1");
-	postRequest(QNetworkRequest(url));
+	getRequest(url);
 }
 
-void Translater::getTranslates(QString word, bool media) {
+void Translater::getTranslates(QString &word, bool media) {
 	/* Send request for translates for given word */
 	QUrl url(SITE_URL + TRANSLATES_PATH);
 	url.addQueryItem("word", word);
 	if (media) {
 		url.addQueryItem("include_media", "1");
 	}
-	QNetworkRequest req(url);
-	postRequest(req);
+	getRequest(url);
 }
 
-void Translater::addWord(QString word, QString translate, QString context) {
+void Translater::addWord(QString &word, QString &translate, QString context) {
 	/* Send request for adding word in user's personal dictionary */
 	QUrl url(SITE_URL + ADDWORD_PATH);
 	url.addQueryItem("word", word);
 	url.addQueryItem("tword", translate);
 	url.addQueryItem("context", context);
-	postRequest(QNetworkRequest(url));
+	getRequest(url);
 }

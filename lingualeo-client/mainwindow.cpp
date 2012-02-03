@@ -2,7 +2,6 @@
 #include <QStatusBar>
 #include <QValidator>
 #include <QAction>
-#include <QAbstractItemModel>
 #include <QStringListModel>
 
 #include "mainwindow.h"
@@ -26,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 	translatesListView_->setViewMode(QListView::ListMode);
 	translatesListView_->setFlow(QListView::TopToBottom);
 	translatesListView_->setMovement(QListView::Static);
+	translatesListView_->setGridSize(QSize(200, 30));
 
 	/* Debug staff */
 	QStringList v {"aba", "caba", "daba"};

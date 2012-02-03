@@ -23,17 +23,20 @@ signals:
 
 public slots:
 	/* LinguaLeo.ru API functions */
-	void login(QString email, QString password);
-	void getTranslates(QString word, bool media = true);
-	void addWord(QString word, QString translate, QString context = "");
+	void login(QString &email, QString &password) const;
+	void getTranslates(QString &word, bool media = true);
+	void addWord(QString &word, QString &translate, QString context = "");
 
 	/* Serve functions */
-	void postRequest(QNetworkRequest req, QByteArray postData = "");
+	void postRequest(QUrl &url, QByteArray postData = "") const;
+	void getRequest(QUrl &url) const;
 	void replyFinished(QNetworkReply *reply);
 
 	// Setters
 
 private:
+	QNetworkRequest wrappedRequest(QUrl &url) const;
+
 	QNetworkAccessManager *manager_;
 	static const QString SITE_URL;
 	static const QString TRANSLATES_PATH;
