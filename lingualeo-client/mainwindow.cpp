@@ -9,7 +9,13 @@
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent) {	
+	/* Options setup */
+	options_[tr("include_media")] = QVariant(true);
+
+	/* Setting inner fields*/
 	translater_ = new Translater();
+	connect(translater_, SIGNAL(wordTranslated(QString,QVariant)), this, SLOT(parseTranslates(QString,QVariant)));
+
 	login();
 
 	statusBar()->showMessage(tr("Login successfully done"));
@@ -25,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
 	translatesListView_->setViewMode(QListView::ListMode);
 	translatesListView_->setFlow(QListView::TopToBottom);
 	translatesListView_->setMovement(QListView::Static);
-	translatesListView_->setGridSize(QSize(200, 30));
 
 	/* Debug staff */
 	QStringList v {"aba", "caba", "daba"};
@@ -104,7 +109,19 @@ void MainWindow::tryLogin() {
 }
 
 /* Main logic */
+void MainWindow::parseTranslates(QString word, QVariant data) {
+	qDebug() << "Word = " << word << endl << "Data = " << data << endl;
+}
+
 void MainWindow::viewTranslates(QStringList &translates) {
 	QAbstractItemModel *model = new QStringListModel(translates);
 	translatesListView_->setModel(model);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event) {
+	if (focusWidget() == mainLineEdit_) {
+		if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+			translater_->getTranslates(mainLineEdit_->text(), options_["include_media"].toBool());
+		}
+	}
 }

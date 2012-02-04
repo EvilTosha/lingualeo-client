@@ -7,10 +7,11 @@
 #include <QDialog>
 #include <QLabel>
 #include <QListView>
+#include <QKeyEvent>
 
 #include "translater.h"
 
-class MainWindow : public QMainWindow{
+class MainWindow : public QMainWindow {
   Q_OBJECT
   
 public:
@@ -21,11 +22,15 @@ public slots:
 	/* Login functions */
 	void login();
 	void tryLogin();
+
+	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates);
+	void keyReleaseEvent(QKeyEvent *event);
 
 private:
 	/* General */
 	Translater *translater_;
+	QMap<QString, QVariant> options_;
 
 	/* Login dialog GUI */
 	QDialog *loginDialog_;
