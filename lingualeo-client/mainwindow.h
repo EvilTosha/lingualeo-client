@@ -18,19 +18,26 @@ public:
   MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
+	/* Getters */
+	QString curWord() const;
+
 public slots:
 	/* Login functions */
 	void login();
 	void tryLogin();
 
 	void parseTranslates(QString word, QVariant data);
-	void viewTranslates(QStringList &translates);
+	void viewTranslates(QStringList &translates, QList<int> &votes);
 	void keyReleaseEvent(QKeyEvent *event);
+
+	/* Setters */
+	void setCurWord(const QString word);
 
 private:
 	/* General */
 	Translater *translater_;
 	QMap<QString, QVariant> options_;
+	QString curWord_;
 
 	/* Login dialog GUI */
 	QDialog *loginDialog_;
@@ -40,6 +47,7 @@ private:
 	/* MainWindow GUI */
 	QLineEdit *mainLineEdit_;
 	QListView *translatesListView_;
+	QTimer *statusRefreshTimer_;
 };
 
 #endif // MAINWINDOW_H

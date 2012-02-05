@@ -32,11 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
 	translatesListView_->setFlow(QListView::TopToBottom);
 	translatesListView_->setMovement(QListView::Static);
 
-	/* Debug staff */
-	QStringList v {"aba", "caba", "daba"};
-	viewTranslates(v);
-	/* End of debug staff */
-
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
 	QRegExpValidator *validator = new QRegExpValidator(rx);
@@ -110,10 +105,21 @@ void MainWindow::tryLogin() {
 
 /* Main logic */
 void MainWindow::parseTranslates(QString word, QVariant data) {
-	qDebug() << "Word = " << word << endl << "Data = " << data << endl;
+	if (word != curWord()) {
+		/* Too late (another word required) */
+		return;
+	}
+	QStringList translates;
+	QList<int> votes;
+	QVariantList rawTranslates = data.toMap()["translate"].toList();
+	for (auto translate : rawTranslates) {
+		translates.push_back(translate.toMap()["value"].toString());
+		votes.push_back(translate.toMap()["votes"].toInt());
+	}
+	viewTranslates(translates, votes);
 }
 
-void MainWindow::viewTranslates(QStringList &translates) {
+void MainWindow::viewTranslates(QStringList &translates, QList<int> &votes) {
 	QAbstractItemModel *model = new QStringListModel(translates);
 	translatesListView_->setModel(model);
 }
@@ -121,7 +127,18 @@ void MainWindow::viewTranslates(QStringList &translates) {
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 	if (focusWidget() == mainLineEdit_) {
 		if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-			translater_->getTranslates(mainLineEdit_->text(), options_["include_media"].toBool());
+			QString word = mainLineEdit_->text();
+			setCurWord(word);
+			translater_->getTranslates(word, options_["include_media"].toBool());
 		}
 	}
+}
+
+/* Getters/Setters */
+QString MainWindow::curWord() const {
+	return curWord_;
+}
+
+void MainWindow::setCurWord(const QString word) {
+	curWord_ = word;
 }

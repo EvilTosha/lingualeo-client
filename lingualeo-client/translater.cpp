@@ -96,7 +96,6 @@ void Translater::login(QString email, QString password) const {
 }
 
 void Translater::getTranslates(QString word, bool media) {
-	qDebug() << "In : getTranslates" << endl;
 	/* Send request for translates for given word */
 	QUrl url(SITE_URL + TRANSLATES_PATH);
 	url.addQueryItem("word", word);
