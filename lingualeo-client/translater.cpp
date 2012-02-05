@@ -58,12 +58,9 @@ void Translater::replyFinished(QNetworkReply *reply) {
 }
 
 QNetworkRequest Translater::wrappedRequest(QUrl &url) const {
-	QNetworkRequest req(url);
 	/* Adding appropriate parameters and headers before sending request */
+	QNetworkRequest req(url);
 	req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-	QVariant cookie;
-	cookie.setValue(manager_->cookieJar()->cookiesForUrl(SITE_URL));
-	req.setHeader(QNetworkRequest::CookieHeader, cookie);
 	return req;
 }
 
@@ -76,12 +73,12 @@ void Translater::getRequest(QUrl &url) const {
 }
 
 QString Translater::getHash(const QString word) const {
-	QDateTime *curTime = new QDateTime();
-	return QString::number(curTime->toMSecsSinceEpoch()) + word;
+	return QString::number(QDateTime::currentMSecsSinceEpoch()) + word;
 }
 
 QString Translater::addHashWord(const QString word) {
 	QString hash = getHash(word);
+	qDebug() << hash << endl;
 	hashes_[hash] = word;
 	return hash;
 }

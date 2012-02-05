@@ -53,14 +53,20 @@ MainWindow::~MainWindow() {
 void MainWindow::login() {
 	/* GUI initialization*/
 	loginDialog_ = new QDialog(this);
-	QLabel *emailLabel = new QLabel(tr("E-mail"));
-	QLabel *passwordLabel = new QLabel(tr("Password"));
-	loginStatusLabel_ = new QLabel(tr("Enter your login and password for lingualeo.ru"));
-	emailLineEdit_ = new QLineEdit();
-	passwordLineEdit_ = new QLineEdit();
+	QLabel *emailLabel = new QLabel(tr("E-mail"), loginDialog_);
+	QLabel *passwordLabel = new QLabel(tr("Password"), loginDialog_);
+	loginStatusLabel_ = new QLabel(tr("Enter your login and password for lingualeo.ru"), loginDialog_);
+	emailLineEdit_ = new QLineEdit(loginDialog_);
+	passwordLineEdit_ = new QLineEdit(loginDialog_);
 	passwordLineEdit_->setEchoMode(QLineEdit::Password);
 	emailLabel->setBuddy(emailLineEdit_);
 	passwordLabel->setBuddy(passwordLineEdit_);
+	QLabel *registerLabel = new QLabel(loginDialog_);
+	registerLabel->setOpenExternalLinks(true);
+	registerLabel->setText("<a href='http://lingualeo.ru/register/step1'>" + tr("Register") + "</a>");
+	registerLabel->setAlignment(Qt::AlignLeft);
+	registerLabel->setAlignment(Qt::AlignBottom);
+
 	QPushButton *loginButton = new QPushButton(tr("Login"), loginDialog_);
 	loginButton->setDefault(true);
 	connect(loginButton, SIGNAL(clicked()), this, SLOT(tryLogin()));
@@ -69,13 +75,14 @@ void MainWindow::login() {
 
 	/* Layout compose */
 	QGridLayout *layout = new QGridLayout(loginDialog_);
-	layout->addWidget(loginStatusLabel_, 0, 0, 1, 2);
+	layout->addWidget(loginStatusLabel_, 0, 0, 1, 3);
 	layout->addWidget(emailLabel, 1, 0);
-	layout->addWidget(emailLineEdit_, 1, 1);
+	layout->addWidget(emailLineEdit_, 1, 1, 1, 2);
 	layout->addWidget(passwordLabel, 2, 0);
-	layout->addWidget(passwordLineEdit_, 2, 1);
-	layout->addWidget(loginButton, 3, 0);
-	layout->addWidget(exitButton, 3, 1);
+	layout->addWidget(passwordLineEdit_, 2, 1, 1, 2);
+	layout->addWidget(registerLabel, 3, 0);
+	layout->addWidget(loginButton, 3, 1);
+	layout->addWidget(exitButton, 3, 2);
 
 	emailLineEdit_->setFocus();
 	loginDialog_->setLayout(layout);
