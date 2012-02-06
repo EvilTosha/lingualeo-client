@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QListView>
 #include <QKeyEvent>
+#include <QTreeWidget>
 
 #include "translater.h"
 
@@ -27,7 +28,7 @@ public slots:
 	void tryLogin();
 
 	void parseTranslates(QString word, QVariant data);
-	void viewTranslates(QStringList &translates, QList<int> &votes);
+	void viewTranslates(QStringList &translates, QStringList &votes);
 	void keyReleaseEvent(QKeyEvent *event);
 
 	/* Setters */
@@ -46,7 +47,7 @@ private:
 
 	/* MainWindow GUI */
 	QLineEdit *mainLineEdit_;
-	QListView *translatesListView_;
+	QTreeWidget *translatesTreeWidget_;
 	QTimer *statusRefreshTimer_;
 };
 

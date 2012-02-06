@@ -27,10 +27,15 @@ MainWindow::MainWindow(QWidget *parent)
 	setCentralWidget(widget);
 	mainLineEdit_ = new QLineEdit(this);
 	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
-	translatesListView_ = new QListView(this);
-	translatesListView_->setViewMode(QListView::ListMode);
-	translatesListView_->setFlow(QListView::TopToBottom);
-	translatesListView_->setMovement(QListView::Static);
+	translatesTreeWidget_ = new QTreeWidget(this);
+	translatesTreeWidget_->setMouseTracking(true);
+
+	translatesTreeWidget_->setColumnCount(2);
+	translatesTreeWidget_->setUniformRowHeights(true);
+	translatesTreeWidget_->setRootIsDecorated(false);
+	translatesTreeWidget_->setSelectionBehavior(QTreeWidget::SelectRows);
+	translatesTreeWidget_->setFrameStyle(QFrame::Box | QFrame::Plain);
+	translatesTreeWidget_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
@@ -40,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Composing layout */
 	QGridLayout *layout = new QGridLayout(centralWidget());
 	layout->addWidget(mainLineEdit_, 0, 0);
-	layout->addWidget(translatesListView_, 1, 0);
+	layout->addWidget(translatesTreeWidget_, 1, 0);
 	widget->setLayout(layout);
 }
 
@@ -117,18 +122,44 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 		return;
 	}
 	QStringList translates;
-	QList<int> votes;
+	QStringList votes;
 	QVariantList rawTranslates = data.toMap()["translate"].toList();
 	for (auto translate : rawTranslates) {
 		translates.push_back(translate.toMap()["value"].toString());
-		votes.push_back(translate.toMap()["votes"].toInt());
+		votes.push_back(QString::number(translate.toMap()["votes"].toInt()));
 	}
 	viewTranslates(translates, votes);
 }
 
-void MainWindow::viewTranslates(QStringList &translates, QList<int> &votes) {
-	QAbstractItemModel *model = new QStringListModel(translates);
-	translatesListView_->setModel(model);
+void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
+	if (translates.isEmpty() || translates.count() != votes.count()) {
+		return;
+	}
+
+	const QPalette &pal = palette();
+	QColor color = pal.color(QPalette::Disabled, QPalette::WindowText);
+
+	translatesTreeWidget_->setUpdatesEnabled(false);
+	translatesTreeWidget_->clear();
+	for (int i = 0; i < translates.count(); ++i) {
+		QTreeWidgetItem * item;
+		item = new QTreeWidgetItem(translatesTreeWidget_);
+		item->setText(0, translates[i]);
+		item->setText(1, votes[i]);
+		item->setTextAlignment(1, Qt::AlignRight);
+		item->setTextColor(1, color);
+	}
+	translatesTreeWidget_->setCurrentItem(translatesTreeWidget_->topLevelItem(0));
+	translatesTreeWidget_->resizeColumnToContents(0);
+	translatesTreeWidget_->resizeColumnToContents(1);
+	translatesTreeWidget_->adjustSize();
+	translatesTreeWidget_->setUpdatesEnabled(true);
+
+	int h = translatesTreeWidget_->sizeHintForRow(0) * qMin(7, translates.count()) + 3;
+	translatesTreeWidget_->resize(translatesTreeWidget_->width(), h);
+
+	translatesTreeWidget_->setFocus();
+	translatesTreeWidget_->show();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {

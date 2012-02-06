@@ -78,7 +78,6 @@ QString Translater::getHash(const QString word) const {
 
 QString Translater::addHashWord(const QString word) {
 	QString hash = getHash(word);
-	qDebug() << hash << endl;
 	hashes_[hash] = word;
 	return hash;
 }
