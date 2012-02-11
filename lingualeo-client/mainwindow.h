@@ -29,7 +29,10 @@ public slots:
 
 	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates, QStringList &votes);
+	void adjustInnerWidgets();
+
 	void keyReleaseEvent(QKeyEvent *event);
+	void resizeEvent(QResizeEvent *event);
 
 	/* Setters */
 	void setCurWord(const QString word);

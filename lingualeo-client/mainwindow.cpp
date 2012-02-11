@@ -11,6 +11,8 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent) {	
 	/* Options setup */
 	options_[tr("include_media")] = QVariant(true);
+	options_[tr("initial_width")] = QVariant(300);
+	options_[tr("initial_height")] = QVariant(200);
 
 	/* Setting inner fields*/
 	translater_ = new Translater();
@@ -23,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Creating GUI elements */
 	setWindowTitle(tr("Lingualeo client"));
+	resize(options_[tr("initial_width")].toInt(), options_[tr("initial_height")].toInt());
 	QWidget *widget = new QWidget(this);
 	setCentralWidget(widget);
 	mainLineEdit_ = new QLineEdit(this);
@@ -36,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
 	translatesTreeWidget_->setSelectionBehavior(QTreeWidget::SelectRows);
 	translatesTreeWidget_->setFrameStyle(QFrame::Box | QFrame::Plain);
 	translatesTreeWidget_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	translatesTreeWidget_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	translatesTreeWidget_->setHeaderHidden(true);
 
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
@@ -150,16 +155,19 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
 		item->setTextColor(1, color);
 	}
 	translatesTreeWidget_->setCurrentItem(translatesTreeWidget_->topLevelItem(0));
-	translatesTreeWidget_->resizeColumnToContents(0);
-	translatesTreeWidget_->resizeColumnToContents(1);
-	translatesTreeWidget_->adjustSize();
+	adjustInnerWidgets();
+	//translatesTreeWidget_->adjustSize();
+
 	translatesTreeWidget_->setUpdatesEnabled(true);
-
-	int h = translatesTreeWidget_->sizeHintForRow(0) * qMin(7, translates.count()) + 3;
-	translatesTreeWidget_->resize(translatesTreeWidget_->width(), h);
-
 	translatesTreeWidget_->setFocus();
 	translatesTreeWidget_->show();
+	update();
+}
+
+void MainWindow::adjustInnerWidgets() {
+	translatesTreeWidget_->resizeColumnToContents(0); // needed for correct resizing of second column
+	translatesTreeWidget_->resizeColumnToContents(1);
+	translatesTreeWidget_->setColumnWidth(0, translatesTreeWidget_->width() - translatesTreeWidget_->columnWidth(1) - 5);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
@@ -170,6 +178,11 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 			translater_->getTranslates(word, options_["include_media"].toBool());
 		}
 	}
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+	QMainWindow::resizeEvent(event);
+	adjustInnerWidgets();
 }
 
 /* Getters/Setters */
