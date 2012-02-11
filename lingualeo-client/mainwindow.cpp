@@ -147,13 +147,19 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
 	translatesTreeWidget_->setUpdatesEnabled(false);
 	translatesTreeWidget_->clear();
 	for (int i = 0; i < translates.count(); ++i) {
-		QTreeWidgetItem * item;
-		item = new QTreeWidgetItem(translatesTreeWidget_);
+		QTreeWidgetItem *item = new QTreeWidgetItem(translatesTreeWidget_);
 		item->setText(0, translates[i]);
+		item->setToolTip(0, translates[i]);
 		item->setText(1, votes[i]);
 		item->setTextAlignment(1, Qt::AlignRight);
 		item->setTextColor(1, color);
+		item->setFlags(item->flags() | Qt::ItemIsEditable);
 	}
+	QTreeWidgetItem *myTranslate = new QTreeWidgetItem(translatesTreeWidget_);
+	myTranslate->setText(0, tr("Enter your translate"));
+	myTranslate->setTextColor(0, color);
+	myTranslate->setFlags(myTranslate->flags() | Qt::ItemIsEditable);
+
 	translatesTreeWidget_->setCurrentItem(translatesTreeWidget_->topLevelItem(0));
 	adjustInnerWidgets();
 	//translatesTreeWidget_->adjustSize();
@@ -171,11 +177,15 @@ void MainWindow::adjustInnerWidgets() {
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
-	if (focusWidget() == mainLineEdit_) {
-		if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+	if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
+		if (focusWidget() == mainLineEdit_) {
 			QString word = mainLineEdit_->text();
 			setCurWord(word);
 			translater_->getTranslates(word, options_["include_media"].toBool());
+		}
+		else {
+			QString translate = translatesTreeWidget_->currentItem()->text(0);
+			translater_->addWord(curWord(), translate);
 		}
 	}
 }
