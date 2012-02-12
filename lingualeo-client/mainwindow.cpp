@@ -8,7 +8,7 @@
 
 
 MainWindow::MainWindow(QWidget *parent)
-	: QMainWindow(parent) {	
+	: QMainWindow(parent), knownTranslateColor_(Qt::darkRed) {
 	/* Options setup */
 	options_[tr("include_media")] = QVariant(true);
 	options_[tr("initial_width")] = QVariant(300);
@@ -46,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent)
 	postTranslateLabel_ = new QLabel(this);
 	postTranslateLabel_->hide();
 
+	imageLabel_ = new QLabel(this);
+	imageLabel_->hide();
+
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
 	QRegExpValidator *validator = new QRegExpValidator(rx);
@@ -53,9 +56,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Composing layout */
 	QGridLayout *layout = new QGridLayout(centralWidget());
-	layout->addWidget(mainLineEdit_, 0, 0);
+	layout->addWidget(mainLineEdit_, 0, 0, 1, 2);
 	layout->addWidget(translatesTreeWidget_, 1, 0);
 	layout->addWidget(postTranslateLabel_, 1, 0);
+	layout->addWidget(imageLabel_, 1, 1);
 	widget->setLayout(layout);
 }
 
@@ -144,7 +148,7 @@ void MainWindow::wordAdded(QString translate) {
 	updateStatus(tr("Word added"), Notification);
 	translatesTreeWidget_->clear();
 	translatesTreeWidget_->hide();
-	postTranslateLabel_->setText(translate);
+	postTranslateLabel_->setText(QString("<font color='%1'>%2</font>").arg(knownTranslateColor_.name(), translate));
 	postTranslateLabel_->show();
 	mainLineEdit_->setFocus();
 	mainLineEdit_->selectAll();
@@ -162,10 +166,11 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 		translates.push_back(translate.toMap()["value"].toString());
 		votes.push_back(QString::number(translate.toMap()["votes"].toInt()));
 	}
-	viewTranslates(translates, votes);
+	bool known = data.toMap()["knownWord"].toBool();
+	viewTranslates(translates, votes, known);
 }
 
-void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
+void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, bool known) {
 	if (translates.count() != votes.count()) {
 		return;
 	}
@@ -177,6 +182,9 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
 	translatesTreeWidget_->clear();
 	for (int i = 0; i < translates.count(); ++i) {
 		QTreeWidgetItem *item = new QTreeWidgetItem(translatesTreeWidget_);
+		if (known && i == 0) {
+			item->setTextColor(0, knownTranslateColor_);
+		}
 		item->setText(0, translates[i]);
 		item->setToolTip(0, translates[i]);
 		item->setText(1, votes[i]);
@@ -201,6 +209,11 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
 	update();
 }
 
+void MainWindow::viewImage(QPixmap *image) {
+	imageLabel_->setPixmap(*image);
+	imageLabel_->hide();
+}
+
 void MainWindow::adjustInnerWidgets() {
 	translatesTreeWidget_->resizeColumnToContents(0); // needed for correct resizing of second column
 	translatesTreeWidget_->resizeColumnToContents(1);
@@ -212,6 +225,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 		if (focusWidget() == mainLineEdit_) {
 			QString word = mainLineEdit_->text();
 			setCurWord(word);
+			imageLabel_->hide();
+			postTranslateLabel_->clear();
+			translatesTreeWidget_->clear();
 			translater_->getTranslates(word, options_["include_media"].toBool());
 		}
 		else {

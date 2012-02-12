@@ -38,7 +38,8 @@ public slots:
 	void tryLogin();
 
 	void parseTranslates(QString word, QVariant data);
-	void viewTranslates(QStringList &translates, QStringList &votes);
+	void viewTranslates(QStringList &translates, QStringList &votes, bool known = false);
+	void viewImage(QPixmap *image);
 	void adjustInnerWidgets();
 	void updateStatus(QString msg, MessageType type = NoType);
 	void wordAdded(QString translate);
@@ -64,6 +65,8 @@ private:
 	QLineEdit *mainLineEdit_;
 	QTreeWidget *translatesTreeWidget_;
 	QLabel *postTranslateLabel_;
+	QLabel *imageLabel_;
+	const QColor knownTranslateColor_;
 };
 
 #endif // MAINWINDOW_H
