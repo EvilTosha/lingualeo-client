@@ -13,6 +13,8 @@
 
 #include "translater.h"
 
+#define TRANSLATE_PLACEHOLDER_TEXT tr("Enter your translate")
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
   
@@ -39,6 +41,7 @@ public slots:
 	void viewTranslates(QStringList &translates, QStringList &votes);
 	void adjustInnerWidgets();
 	void updateStatus(QString msg, MessageType type = NoType);
+	void wordAdded(QString translate);
 
 	void keyReleaseEvent(QKeyEvent *event);
 	void resizeEvent(QResizeEvent *event);
@@ -60,6 +63,7 @@ private:
 	/* MainWindow GUI */
 	QLineEdit *mainLineEdit_;
 	QTreeWidget *translatesTreeWidget_;
+	QLabel *postTranslateLabel_;
 };
 
 #endif // MAINWINDOW_H

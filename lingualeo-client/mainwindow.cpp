@@ -21,15 +21,16 @@ MainWindow::MainWindow(QWidget *parent)
 	login();
 
 	/* Creating GUI elements */
-	updateStatus(tr("Login successfully done"));
-	connect(translater_, SIGNAL(requestFailed(QString)), this, SLOT(updateStatus(QString, Error)));
+	updateStatus(tr("Login successfully done"), Notification);
+	connect(translater_, SIGNAL(requestFailed(QString)), this, SLOT(updateStatus(QString)));
+	connect(translater_, SIGNAL(wordAdded(QString)), this, SLOT(wordAdded(QString)));
 
 	setWindowTitle(tr("Lingualeo client"));
 	resize(options_[tr("initial_width")].toInt(), options_[tr("initial_height")].toInt());
 	QWidget *widget = new QWidget(this);
 	setCentralWidget(widget);
 	mainLineEdit_ = new QLineEdit(this);
-	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
+	mainLineEdit_->setPlaceholderText("Enter word for translate");
 
 	translatesTreeWidget_ = new QTreeWidget(this);
 	translatesTreeWidget_->setMouseTracking(true);
@@ -42,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent)
 	translatesTreeWidget_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	translatesTreeWidget_->setHeaderHidden(true);
 
+	postTranslateLabel_ = new QLabel(this);
+	postTranslateLabel_->hide();
+
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
 	QRegExpValidator *validator = new QRegExpValidator(rx);
@@ -51,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QGridLayout *layout = new QGridLayout(centralWidget());
 	layout->addWidget(mainLineEdit_, 0, 0);
 	layout->addWidget(translatesTreeWidget_, 1, 0);
+	layout->addWidget(postTranslateLabel_, 1, 0);
 	widget->setLayout(layout);
 }
 
@@ -135,6 +140,16 @@ void MainWindow::updateStatus(QString msg, MessageType type) {
 	statusBar()->showMessage(msg, 3000);
 }
 
+void MainWindow::wordAdded(QString translate) {
+	updateStatus(tr("Word added"), Notification);
+	translatesTreeWidget_->clear();
+	translatesTreeWidget_->hide();
+	postTranslateLabel_->setText(translate);
+	postTranslateLabel_->show();
+	mainLineEdit_->setFocus();
+	mainLineEdit_->selectAll();
+}
+
 void MainWindow::parseTranslates(QString word, QVariant data) {
 	if (word != curWord()) {
 		/* Too late (another word required) */
@@ -151,7 +166,7 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 }
 
 void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
-	if (translates.isEmpty() || translates.count() != votes.count()) {
+	if (translates.count() != votes.count()) {
 		return;
 	}
 
@@ -170,13 +185,15 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes) {
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
 	}
 	QTreeWidgetItem *myTranslate = new QTreeWidgetItem(translatesTreeWidget_);
-	myTranslate->setText(0, tr("Enter your translate"));
+	myTranslate->setText(0, TRANSLATE_PLACEHOLDER_TEXT);
 	myTranslate->setTextColor(0, color);
 	myTranslate->setFlags(myTranslate->flags() | Qt::ItemIsEditable);
 
 	translatesTreeWidget_->setCurrentItem(translatesTreeWidget_->topLevelItem(0));
 	adjustInnerWidgets();
 	//translatesTreeWidget_->adjustSize();
+
+	postTranslateLabel_->hide();
 
 	translatesTreeWidget_->setUpdatesEnabled(true);
 	translatesTreeWidget_->setFocus();
@@ -199,8 +216,12 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 		}
 		else {
 			QString translate = translatesTreeWidget_->currentItem()->text(0);
-			qDebug() << "Chosen translate: " << translate << endl;
-			//translater_->addWord(curWord(), translate);
+			if (translate == TRANSLATE_PLACEHOLDER_TEXT) {
+				updateStatus(tr("Please enter translate"), Error);
+			}
+			else {
+				translater_->addWord(curWord(), translate);
+			}
 		}
 	}
 }

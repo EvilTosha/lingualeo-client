@@ -24,13 +24,12 @@ void Translater::replyFinished(QNetworkReply *reply) {
 		QVariant parseResult = parser.parse(data, &parseSuccess);
 		/* Error handling */
 		if (!parseSuccess) {
-			emit requestFailed(tr("Reply parse error"));
+			emit requestFailed(tr("Error: Reply parse error"));
 			return;
 		}
 		QString errorMsg = parseResult.toMap()["error_msg"].toString();
 		if (errorMsg != "") {
-			emit requestFailed(tr("Error occured, error msg: ") + errorMsg);
-			qDebug() << parseResult << endl;
+			emit requestFailed(errorMsg);
 			return;
 		}
 
@@ -44,14 +43,15 @@ void Translater::replyFinished(QNetworkReply *reply) {
 			emit wordTranslated(hashes_[hash], parseResult);
 		}
 		else if (path.compare(ADDWORD_PATH) == 0) {
-			emit wordAdded();
+			QString translate = parseResult.toMap()["translate_value"].toString();
+			emit wordAdded(translate);
 		}
 		else {
 
 		}
 	} else {
 		int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-		emit requestFailed(tr("Error occured, code: ") + QString::number(httpStatus));
+		emit requestFailed(tr("Error: code: ") + QString::number(httpStatus));
 	}
 	reply->deleteLater();
 }

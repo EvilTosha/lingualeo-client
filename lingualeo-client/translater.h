@@ -17,7 +17,7 @@ public:
 
 signals:
 	void wordTranslated(QString word, QVariant translateData);
-	void wordAdded();
+	void wordAdded(QString translate);
 	void loginSucceed();
 	void requestFailed(QString errorMsg = "");
 

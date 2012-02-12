@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class COMReader : public QObject{
+class COMReader : public QObject {
   Q_OBJECT
 public:
   explicit COMReader(QObject *parent = 0);
