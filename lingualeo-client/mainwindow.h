@@ -9,6 +9,7 @@
 #include <QListView>
 #include <QKeyEvent>
 #include <QTreeWidget>
+#include <QTimer>
 
 #include "translater.h"
 
@@ -18,6 +19,13 @@ class MainWindow : public QMainWindow {
 public:
   MainWindow(QWidget *parent = 0);
   ~MainWindow();
+
+	enum MessageType {
+		NoType,
+		Notification,
+		Warning,
+		Error
+	};
 
 	/* Getters */
 	QString curWord() const;
@@ -30,6 +38,7 @@ public slots:
 	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates, QStringList &votes);
 	void adjustInnerWidgets();
+	void updateStatus(QString msg, MessageType type = NoType);
 
 	void keyReleaseEvent(QKeyEvent *event);
 	void resizeEvent(QResizeEvent *event);
@@ -51,7 +60,6 @@ private:
 	/* MainWindow GUI */
 	QLineEdit *mainLineEdit_;
 	QTreeWidget *translatesTreeWidget_;
-	QTimer *statusRefreshTimer_;
 };
 
 #endif // MAINWINDOW_H

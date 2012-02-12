@@ -29,7 +29,7 @@ void Translater::replyFinished(QNetworkReply *reply) {
 		}
 		QString errorMsg = parseResult.toMap()["error_msg"].toString();
 		if (errorMsg != "") {
-			emit requestFailed(errorMsg);
+			emit requestFailed(tr("Error occured, error msg: ") + errorMsg);
 			qDebug() << parseResult << endl;
 			return;
 		}
@@ -51,8 +51,7 @@ void Translater::replyFinished(QNetworkReply *reply) {
 		}
 	} else {
 		int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-		emit requestFailed(tr("Error code: ") + QString::number(httpStatus));
-		qDebug() << "Error : " << httpStatus << endl;
+		emit requestFailed(tr("Error occured, code: ") + QString::number(httpStatus));
 	}
 	reply->deleteLater();
 }

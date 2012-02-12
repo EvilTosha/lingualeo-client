@@ -20,19 +20,19 @@ MainWindow::MainWindow(QWidget *parent)
 
 	login();
 
-	statusBar()->showMessage(tr("Login successfully done"));
-	connect(translater_, SIGNAL(requestFailed(QString)), statusBar(), SLOT(showMessage(QString)));
-
 	/* Creating GUI elements */
+	updateStatus(tr("Login successfully done"));
+	connect(translater_, SIGNAL(requestFailed(QString)), this, SLOT(updateStatus(QString, Error)));
+
 	setWindowTitle(tr("Lingualeo client"));
 	resize(options_[tr("initial_width")].toInt(), options_[tr("initial_height")].toInt());
 	QWidget *widget = new QWidget(this);
 	setCentralWidget(widget);
 	mainLineEdit_ = new QLineEdit(this);
 	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
+
 	translatesTreeWidget_ = new QTreeWidget(this);
 	translatesTreeWidget_->setMouseTracking(true);
-
 	translatesTreeWidget_->setColumnCount(2);
 	translatesTreeWidget_->setUniformRowHeights(true);
 	translatesTreeWidget_->setRootIsDecorated(false);
@@ -121,6 +121,20 @@ void MainWindow::tryLogin() {
 }
 
 /* Main logic */
+void MainWindow::updateStatus(QString msg, MessageType type) {
+	switch (type) {
+		case Error:
+			msg = tr("Error: ") + msg;
+			break;
+		case Warning:
+			msg = tr("Warning: ") + msg;
+			break;
+		default:
+			break;
+	}
+	statusBar()->showMessage(msg, 3000);
+}
+
 void MainWindow::parseTranslates(QString word, QVariant data) {
 	if (word != curWord()) {
 		/* Too late (another word required) */
@@ -185,7 +199,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 		}
 		else {
 			QString translate = translatesTreeWidget_->currentItem()->text(0);
-			translater_->addWord(curWord(), translate);
+			qDebug() << "Chosen translate: " << translate << endl;
+			//translater_->addWord(curWord(), translate);
 		}
 	}
 }
