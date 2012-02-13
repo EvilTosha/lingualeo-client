@@ -20,11 +20,13 @@ signals:
 	void wordAdded(QString translate);
 	void loginSucceed();
 	void requestFailed(QString errorMsg = "");
+	void pictureGot(QString word, QPixmap *picture);
 
 public slots:
 	/* LinguaLeo.ru API functions */
 	void login(QString email, QString password) const;
 	void getTranslates(QString word, bool media = true);
+	void getPicture(QString word, QString path);
 	void addWord(QString word, QString translate, QString context = "");
 
 private slots:
@@ -44,6 +46,7 @@ private:
 	static const QString TRANSLATES_PATH;
 	static const QString LOGIN_PATH;
 	static const QString ADDWORD_PATH;
+	static const QString PICTURE_PREFIX;
 };
 
 #endif // TRANSLATER_H

@@ -11,8 +11,9 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), knownTranslateColor_(Qt::darkRed) {
 	/* Options setup */
 	options_[tr("include_media")] = QVariant(true);
-	options_[tr("initial_width")] = QVariant(300);
+	options_[tr("initial_width")] = QVariant(410);
 	options_[tr("initial_height")] = QVariant(200);
+	options_[tr("max_image_size")] = QVariant(QSize(110, 110));
 
 	/* Setting inner fields*/
 	translater_ = new Translater();
@@ -30,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QWidget *widget = new QWidget(this);
 	setCentralWidget(widget);
 	mainLineEdit_ = new QLineEdit(this);
-	mainLineEdit_->setPlaceholderText("Enter word for translate");
+	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
 
 	translatesTreeWidget_ = new QTreeWidget(this);
 	translatesTreeWidget_->setMouseTracking(true);
@@ -47,7 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
 	postTranslateLabel_->hide();
 
 	imageLabel_ = new QLabel(this);
-	imageLabel_->hide();
+	imageLabel_->setMaximumSize(options_["max_image_size"].toSize());
+	imageLabel_->show();
+	connect(translater_, SIGNAL(pictureGot(QString,QPixmap*)), this, SLOT(viewImage(QString,QPixmap*)));
 
 	/* Input validation (only latin letters and spaces) */
 	QRegExp rx("[a-zA-Z\\s]*");
@@ -60,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent)
 	layout->addWidget(translatesTreeWidget_, 1, 0);
 	layout->addWidget(postTranslateLabel_, 1, 0);
 	layout->addWidget(imageLabel_, 1, 1);
+	layout->setColumnMinimumWidth(1, 110);
 	widget->setLayout(layout);
 }
 
@@ -148,7 +152,7 @@ void MainWindow::wordAdded(QString translate) {
 	updateStatus(tr("Word added"), Notification);
 	translatesTreeWidget_->clear();
 	translatesTreeWidget_->hide();
-	postTranslateLabel_->setText(QString("<font color='%1'>%2</font>").arg(knownTranslateColor_.name(), translate));
+	postTranslateLabel_->setText(QString("<font color='%1'><b>%2</b></font>").arg(knownTranslateColor_.name(), translate));
 	postTranslateLabel_->show();
 	mainLineEdit_->setFocus();
 	mainLineEdit_->selectAll();
@@ -168,6 +172,8 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 	}
 	bool known = data.toMap()["knownWord"].toBool();
 	viewTranslates(translates, votes, known);
+	QString imagePath = data.toMap()["pic_url"].toString();
+	translater_->getPicture(word, imagePath);
 }
 
 void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, bool known) {
@@ -184,6 +190,9 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, boo
 		QTreeWidgetItem *item = new QTreeWidgetItem(translatesTreeWidget_);
 		if (known && i == 0) {
 			item->setTextColor(0, knownTranslateColor_);
+			QFont font(item->font(0));
+			font.setBold(true);
+			item->setFont(0, font);
 		}
 		item->setText(0, translates[i]);
 		item->setToolTip(0, translates[i]);
@@ -209,15 +218,20 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, boo
 	update();
 }
 
-void MainWindow::viewImage(QPixmap *image) {
-	imageLabel_->setPixmap(*image);
-	imageLabel_->hide();
+void MainWindow::viewImage(QString word, QPixmap *image) {
+	if (word != curWord()) {
+		// too late
+		return;
+	}
+	imageLabel_->setPixmap((*image).scaled(options_["max_image_size"].toSize(), Qt::KeepAspectRatio));
+	imageLabel_->show();
+	update();
 }
 
 void MainWindow::adjustInnerWidgets() {
 	translatesTreeWidget_->resizeColumnToContents(0); // needed for correct resizing of second column
 	translatesTreeWidget_->resizeColumnToContents(1);
-	translatesTreeWidget_->setColumnWidth(0, translatesTreeWidget_->width() - translatesTreeWidget_->columnWidth(1) - 5);
+	translatesTreeWidget_->setColumnWidth(0, translatesTreeWidget_->width() - translatesTreeWidget_->columnWidth(1) - 10);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {

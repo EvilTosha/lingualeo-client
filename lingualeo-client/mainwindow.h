@@ -39,7 +39,7 @@ public slots:
 
 	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates, QStringList &votes, bool known = false);
-	void viewImage(QPixmap *image);
+	void viewImage(QString word, QPixmap *image);
 	void adjustInnerWidgets();
 	void updateStatus(QString msg, MessageType type = NoType);
 	void wordAdded(QString translate);

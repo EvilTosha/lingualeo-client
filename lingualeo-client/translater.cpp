@@ -1,4 +1,5 @@
 #include <QDateTime>
+#include <QPixmap>
 
 #include "translater.h"
 
@@ -6,6 +7,7 @@ const QString Translater::SITE_URL("http://lingualeo.ru");
 const QString Translater::TRANSLATES_PATH("/api/gettranslates");
 const QString Translater::LOGIN_PATH("/api/login");
 const QString Translater::ADDWORD_PATH("/api/addword");
+const QString Translater::PICTURE_PREFIX("/uploads/picture/");
 
 
 Translater::Translater(QObject *parent) :
@@ -17,37 +19,46 @@ Translater::Translater(QObject *parent) :
 
 void Translater::replyFinished(QNetworkReply *reply) {
 	if ((reply->error()) == QNetworkReply::NoError) {
-		/* Parsing json data from reply */
-		QByteArray data = reply->readAll();
-		QJson::Parser parser;
-		bool parseSuccess;
-		QVariant parseResult = parser.parse(data, &parseSuccess);
-		/* Error handling */
-		if (!parseSuccess) {
-			emit requestFailed(tr("Error: Reply parse error"));
-			return;
-		}
-		QString errorMsg = parseResult.toMap()["error_msg"].toString();
-		if (errorMsg != "") {
-			emit requestFailed(errorMsg);
-			return;
-		}
-
-		/* Request type switch */
 		QString path = reply->url().path();
-		if (path.compare(LOGIN_PATH) == 0) {
-			emit loginSucceed();
-		}
-		else if (path.compare(TRANSLATES_PATH) == 0) {
-			QString hash = reply->url().queryItemValue("hash");
-			emit wordTranslated(hashes_[hash], parseResult);
-		}
-		else if (path.compare(ADDWORD_PATH) == 0) {
-			QString translate = parseResult.toMap()["translate_value"].toString();
-			emit wordAdded(translate);
+		if (path.contains(PICTURE_PREFIX)) {
+			/* Picture processing */
+			QPixmap *pixmap = new QPixmap();
+			pixmap->loadFromData(reply->readAll());
+			QString word = reply->url().queryItemValue("word");
+			emit pictureGot(word, pixmap);
 		}
 		else {
+			/* Parsing json data from reply */
+			QByteArray data = reply->readAll();
+			QJson::Parser parser;
+			bool parseSuccess;
+			QVariant parseResult = parser.parse(data, &parseSuccess);
+			/* Error handling */
+			if (!parseSuccess) {
+				emit requestFailed(tr("Error: Reply parse error"));
+				return;
+			}
+			QString errorMsg = parseResult.toMap()["error_msg"].toString();
+			if (errorMsg != "") {
+				emit requestFailed(errorMsg);
+				return;
+			}
 
+			/* Request type switch */
+			if (path.compare(LOGIN_PATH) == 0) {
+				emit loginSucceed();
+			}
+			else if (path.compare(TRANSLATES_PATH) == 0) {
+				QString hash = reply->url().queryItemValue("hash");
+				emit wordTranslated(hashes_[hash], parseResult);
+			}
+			else if (path.compare(ADDWORD_PATH) == 0) {
+				QString translate = parseResult.toMap()["translate_value"].toString();
+				emit wordAdded(translate);
+			}
+			else {
+
+			}
 		}
 	} else {
 		int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -77,7 +88,9 @@ QString Translater::getHash(const QString word) const {
 
 QString Translater::addHashWord(const QString word) {
 	QString hash = getHash(word);
-	hashes_[hash] = word;
+	if (!hashes_.contains(hash)) {
+		hashes_[hash] = word;
+	}
 	return hash;
 }
 
@@ -98,6 +111,13 @@ void Translater::getTranslates(QString word, bool media) {
 	if (media) {
 		url.addQueryItem("include_media", "1");
 	}
+	getRequest(url);
+}
+
+void Translater::getPicture(QString word, QString path) {
+	/* Send request for picture for given word */
+	QUrl url(path);
+	url.addQueryItem("word", word);
 	getRequest(url);
 }
 
