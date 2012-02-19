@@ -28,10 +28,24 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setWindowTitle(tr("Lingualeo client"));
 	resize(options_[tr("initial_width")].toInt(), options_[tr("initial_height")].toInt());
-	QWidget *widget = new QWidget(this);
-	setCentralWidget(widget);
+
+	/* Menu elements */
+	QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	QAction *prefAction = toolsMenu->addAction(tr("Preferances"));
+	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+	QAction *aboutAction = helpMenu->addAction(tr("About"));
+
+	/* LineEdit for words */
 	mainLineEdit_ = new QLineEdit(this);
 	mainLineEdit_->setPlaceholderText(tr("Enter word for translate"));
+	/* Input validation (only latin letters and spaces) */
+	QRegExp rx("[a-zA-Z\\s]*");
+	QRegExpValidator *validator = new QRegExpValidator(rx);
+	mainLineEdit_->setValidator(validator);
+
+	/* Central part */
+	QWidget *widget = new QWidget(this);
+	setCentralWidget(widget);
 
 	translatesTreeWidget_ = new QTreeWidget(this);
 	translatesTreeWidget_->setMouseTracking(true);
@@ -47,15 +61,11 @@ MainWindow::MainWindow(QWidget *parent)
 	postTranslateLabel_ = new QLabel(this);
 	postTranslateLabel_->hide();
 
+	/* Image viewer */
 	imageLabel_ = new QLabel(this);
 	imageLabel_->setMaximumSize(options_["max_image_size"].toSize());
 	imageLabel_->show();
 	connect(translater_, SIGNAL(pictureGot(QString,QPixmap*)), this, SLOT(viewImage(QString,QPixmap*)));
-
-	/* Input validation (only latin letters and spaces) */
-	QRegExp rx("[a-zA-Z\\s]*");
-	QRegExpValidator *validator = new QRegExpValidator(rx);
-	mainLineEdit_->setValidator(validator);
 
 	/* Composing layout */
 	QGridLayout *layout = new QGridLayout(centralWidget());

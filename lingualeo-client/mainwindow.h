@@ -10,6 +10,8 @@
 #include <QKeyEvent>
 #include <QTreeWidget>
 #include <QTimer>
+#include <QMenu>
+#include <QMenuBar>
 
 #include "translater.h"
 
@@ -22,6 +24,7 @@ public:
   MainWindow(QWidget *parent = 0);
   ~MainWindow();
 
+	/* Types of messages for status bar */
 	enum MessageType {
 		NoType,
 		Notification,
