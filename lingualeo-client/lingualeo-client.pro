@@ -32,3 +32,6 @@ win32 {
 } unix:!macx {
 	LIBS += -L./QJson -lqjson
 }
+
+RESOURCES += \
+    res.qrc

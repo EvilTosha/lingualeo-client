@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 	translater_ = new Translater();
 	connect(translater_, SIGNAL(wordTranslated(QString,QVariant)), this, SLOT(parseTranslates(QString,QVariant)));
 
-	login();
+	showLoginDialog();
 
 	/* Creating GUI elements */
 	updateStatus(tr("Login successfully done"), Notification);
@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
 	QAction *prefAction = toolsMenu->addAction(tr("Preferances"));
 	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
 	QAction *aboutAction = helpMenu->addAction(tr("About"));
+	connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
 
 	/* LineEdit for words */
 	mainLineEdit_ = new QLineEdit(this);
@@ -83,7 +84,7 @@ MainWindow::~MainWindow() {
 
 
 /* Login logic */
-void MainWindow::login() {
+void MainWindow::showLoginDialog() {
 	/* GUI initialization*/
 	loginDialog_ = new QDialog(this);
 	QLabel *emailLabel = new QLabel(tr("E-mail"), loginDialog_);
@@ -242,6 +243,22 @@ void MainWindow::adjustInnerWidgets() {
 	translatesTreeWidget_->resizeColumnToContents(0); // needed for correct resizing of second column
 	translatesTreeWidget_->resizeColumnToContents(1);
 	translatesTreeWidget_->setColumnWidth(0, translatesTreeWidget_->width() - translatesTreeWidget_->columnWidth(1) - 10);
+}
+
+void MainWindow::showAboutDialog() {
+	QDialog *aboutDialog = new QDialog(this);
+	QLabel *textLabel = new QLabel(tr("Desktop client for <a href='http://lingualeo.ru'>LinguaLeo</a> by Anton Samoylov <br/>") +
+																 tr("You can contact me via email: <a href='mailto:toshaevil@gmail.com'>toshaevil@gmail.com</a><br/>") +
+																 tr("Source code can be found at <a href='https://github.com/EvilTosha/lingualeo-client'>GitHub</a>"),
+																 aboutDialog);
+	textLabel->setOpenExternalLinks(true);
+	QLabel *logoLabel = new QLabel(aboutDialog);
+	logoLabel->setPixmap(QPixmap("resources/logo.jpg"));
+	QGridLayout *layout = new QGridLayout(aboutDialog);
+	layout->addWidget(logoLabel, 0, 0);
+	layout->addWidget(textLabel, 0, 1);
+	aboutDialog->setLayout(layout);
+	aboutDialog->exec();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {

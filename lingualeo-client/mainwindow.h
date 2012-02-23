@@ -37,8 +37,10 @@ public:
 
 public slots:
 	/* Login functions */
-	void login();
+	void showLoginDialog();
 	void tryLogin();
+
+	void showAboutDialog();
 
 	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates, QStringList &votes, bool known = false);
