@@ -41,6 +41,7 @@ public slots:
 	void tryLogin();
 
 	void showAboutDialog();
+	void showPreferancesDialog();
 
 	void parseTranslates(QString word, QVariant data);
 	void viewTranslates(QStringList &translates, QStringList &votes, bool known = false);

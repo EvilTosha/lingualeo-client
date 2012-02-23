@@ -9,6 +9,9 @@
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), knownTranslateColor_(Qt::darkRed) {
+	setWindowTitle(tr("Lingualeo client"));
+	setWindowIcon(QIcon("resources/logo_transparent.png"));
+
 	/* Options setup */
 	options_[tr("include_media")] = QVariant(true);
 	options_[tr("initial_width")] = QVariant(410);
@@ -26,15 +29,13 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(translater_, SIGNAL(requestFailed(QString)), this, SLOT(updateStatus(QString)));
 	connect(translater_, SIGNAL(wordAdded(QString)), this, SLOT(wordAdded(QString)));
 
-	setWindowTitle(tr("Lingualeo client"));
 	resize(options_[tr("initial_width")].toInt(), options_[tr("initial_height")].toInt());
 
 	/* Menu elements */
 	QMenu *toolsMenu = menuBar()->addMenu(tr("&Tools"));
-	QAction *prefAction = toolsMenu->addAction(tr("Preferances"));
+	toolsMenu->addAction(tr("Preferances"), this, SLOT(showPreferancesDialog()));
 	QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-	QAction *aboutAction = helpMenu->addAction(tr("About"));
-	connect(aboutAction, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
+	helpMenu->addAction(tr("About"), this, SLOT(showAboutDialog()));
 
 	/* LineEdit for words */
 	mainLineEdit_ = new QLineEdit(this);
@@ -87,6 +88,7 @@ MainWindow::~MainWindow() {
 void MainWindow::showLoginDialog() {
 	/* GUI initialization*/
 	loginDialog_ = new QDialog(this);
+	loginDialog_->setWindowTitle(tr("Authorization to lingualeo.ru"));
 	QLabel *emailLabel = new QLabel(tr("E-mail"), loginDialog_);
 	QLabel *passwordLabel = new QLabel(tr("Password"), loginDialog_);
 	loginStatusLabel_ = new QLabel(tr("Enter your login and password for lingualeo.ru"), loginDialog_);
@@ -120,7 +122,6 @@ void MainWindow::showLoginDialog() {
 
 	emailLineEdit_->setFocus();
 	loginDialog_->setLayout(layout);
-	loginDialog_->setWindowTitle(tr("Authorization to lingualeo.ru"));
 	loginDialog_->setModal(true);
 
 	/* Completion logic */
@@ -247,6 +248,7 @@ void MainWindow::adjustInnerWidgets() {
 
 void MainWindow::showAboutDialog() {
 	QDialog *aboutDialog = new QDialog(this);
+	aboutDialog->setWindowTitle(tr("About lingualeo client"));
 	QLabel *textLabel = new QLabel(tr("Desktop client for <a href='http://lingualeo.ru'>LinguaLeo</a> by Anton Samoylov <br/>") +
 																 tr("You can contact me via email: <a href='mailto:toshaevil@gmail.com'>toshaevil@gmail.com</a><br/>") +
 																 tr("Source code can be found at <a href='https://github.com/EvilTosha/lingualeo-client'>GitHub</a>"),
@@ -259,6 +261,15 @@ void MainWindow::showAboutDialog() {
 	layout->addWidget(textLabel, 0, 1);
 	aboutDialog->setLayout(layout);
 	aboutDialog->exec();
+}
+
+void MainWindow::showPreferancesDialog() {
+	QDialog *preferancesDialog = new QDialog(this);
+	preferancesDialog->setWindowTitle(tr("Preferances"));
+
+	QGridLayout *layout = new QGridLayout(preferancesDialog);
+	preferancesDialog->setLayout(layout);
+	preferancesDialog->exec();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {

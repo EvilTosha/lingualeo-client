@@ -33,5 +33,4 @@ win32 {
 	LIBS += -L./QJson -lqjson
 }
 
-RESOURCES += \
-    res.qrc
+RESOURCES +=
