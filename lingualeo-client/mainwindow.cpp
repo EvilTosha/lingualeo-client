@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 	options_[tr("initial_width")] = QVariant(410);
 	options_[tr("initial_height")] = QVariant(200);
 	options_[tr("max_image_size")] = QVariant(QSize(110, 110));
+	options_[tr("download_images")] = QVariant(true);
 
 	/* Setting inner fields*/
 	translater_ = new Translater();
@@ -25,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
 	showLoginDialog();
 
 	/* Creating GUI elements */
-	updateStatus(tr("Login successfully done"), Notification);
 	connect(translater_, SIGNAL(requestFailed(QString)), this, SLOT(updateStatus(QString)));
 	connect(translater_, SIGNAL(wordAdded(QString)), this, SLOT(wordAdded(QString)));
 
@@ -80,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
-  
+
 }
 
 
@@ -129,10 +129,11 @@ void MainWindow::showLoginDialog() {
 	connect(translater_, SIGNAL(loginSucceed()), loginDialog_, SLOT(accept()));
 	if (loginDialog_->exec()) {
 		loginDialog_->close();
-	}
+		updateStatus(tr("Login successfully done"), Notification);
+		}
 	else {
 		exit(0);
-	}
+		}
 }
 
 void MainWindow::tryLogin() {
@@ -141,7 +142,7 @@ void MainWindow::tryLogin() {
 	if (email == "" || password == "") {
 		loginStatusLabel_->setText(tr("Please fill all fields"));
 		return;
-	}
+		}
 	translater_->login(email, password);
 }
 
@@ -156,7 +157,7 @@ void MainWindow::updateStatus(QString msg, MessageType type) {
 			break;
 		default:
 			break;
-	}
+		}
 	statusBar()->showMessage(msg, 3000);
 }
 
@@ -174,14 +175,14 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 	if (word != curWord()) {
 		/* Too late (another word required) */
 		return;
-	}
+		}
 	QStringList translates;
 	QStringList votes;
 	QVariantList rawTranslates = data.toMap()["translate"].toList();
 	for (auto translate : rawTranslates) {
 		translates.push_back(translate.toMap()["value"].toString());
 		votes.push_back(QString::number(translate.toMap()["votes"].toInt()));
-	}
+		}
 	bool known = data.toMap()["knownWord"].toBool();
 	viewTranslates(translates, votes, known);
 	QString imagePath = data.toMap()["pic_url"].toString();
@@ -191,7 +192,7 @@ void MainWindow::parseTranslates(QString word, QVariant data) {
 void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, bool known) {
 	if (translates.count() != votes.count()) {
 		return;
-	}
+		}
 
 	const QPalette &pal = palette();
 	QColor color = pal.color(QPalette::Disabled, QPalette::WindowText);
@@ -205,14 +206,14 @@ void MainWindow::viewTranslates(QStringList &translates, QStringList &votes, boo
 			QFont font(item->font(0));
 			font.setBold(true);
 			item->setFont(0, font);
-		}
+			}
 		item->setText(0, translates[i]);
 		item->setToolTip(0, translates[i]);
 		item->setText(1, votes[i]);
 		item->setTextAlignment(1, Qt::AlignRight);
 		item->setTextColor(1, color);
 		item->setFlags(item->flags() | Qt::ItemIsEditable);
-	}
+		}
 	QTreeWidgetItem *myTranslate = new QTreeWidgetItem(translatesTreeWidget_);
 	myTranslate->setText(0, TRANSLATE_PLACEHOLDER_TEXT);
 	myTranslate->setTextColor(0, color);
@@ -234,8 +235,14 @@ void MainWindow::viewImage(QString word, QPixmap *image) {
 	if (word != curWord()) {
 		// too late
 		return;
-	}
-	imageLabel_->setPixmap((*image).scaled(options_["max_image_size"].toSize(), Qt::KeepAspectRatio));
+		}
+	QSize maxSize = options_["max_image_size"].toSize();
+	if (image->size().height() > maxSize.height() || image->size().width() > maxSize.width()) {
+		imageLabel_->setPixmap((*image).scaled(maxSize , Qt::KeepAspectRatio));
+		}
+	else {
+		imageLabel_->setPixmap(*image);
+		}
 	imageLabel_->show();
 	update();
 }
@@ -281,17 +288,17 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 			postTranslateLabel_->clear();
 			translatesTreeWidget_->clear();
 			translater_->getTranslates(word, options_["include_media"].toBool());
-		}
+			}
 		else {
 			QString translate = translatesTreeWidget_->currentItem()->text(0);
 			if (translate == TRANSLATE_PLACEHOLDER_TEXT) {
 				updateStatus(tr("Please enter translate"), Error);
-			}
+				}
 			else {
 				translater_->addWord(curWord(), translate);
+				}
 			}
 		}
-	}
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
