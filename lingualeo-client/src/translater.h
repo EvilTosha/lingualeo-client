@@ -5,10 +5,10 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <QNetworkCookieJar>
+#include <QtNetwork/QNetworkCookieJar>
 #include <QDebug>
 
-#include "QJson/parser.h"
+#include "parser.h"
 
 class Translater : public QObject {
   Q_OBJECT

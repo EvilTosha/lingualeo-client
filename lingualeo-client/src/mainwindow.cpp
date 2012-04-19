@@ -10,7 +10,7 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent), knownTranslateColor_(Qt::darkRed) {
 	setWindowTitle(tr("Lingualeo client"));
-	setWindowIcon(QIcon("resources/logo_transparent.png"));
+	setWindowIcon(QIcon("../resources/logo_transparent.png"));
 
 	/* Options setup */
 	options_[tr("include_media")] = QVariant(true);
@@ -262,7 +262,7 @@ void MainWindow::showAboutDialog() {
 																 aboutDialog);
 	textLabel->setOpenExternalLinks(true);
 	QLabel *logoLabel = new QLabel(aboutDialog);
-	logoLabel->setPixmap(QPixmap("resources/logo.jpg"));
+	logoLabel->setPixmap(QPixmap("../resources/logo.jpg"));
 	QGridLayout *layout = new QGridLayout(aboutDialog);
 	layout->addWidget(logoLabel, 0, 0);
 	layout->addWidget(textLabel, 0, 1);
