@@ -24,3 +24,5 @@ win32 {
 INCLUDEPATH += ../QJson
 
 QMAKE_CXXFLAGS += -std=c++0x
+
+

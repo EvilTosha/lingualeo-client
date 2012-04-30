@@ -5,6 +5,8 @@
 Makefile
 debug/
 release/
+*/debug/
+*/release/
 lib/
 QJson/*.dll
 QJson/*.prl
